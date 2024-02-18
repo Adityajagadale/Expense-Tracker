@@ -1,0 +1,161 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+class User {
+    String username;
+    String password;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+}
+
+class Expense {
+    String category;
+    double amount;
+
+    public Expense(String category, double amount) {
+        this.category = category;
+        this.amount = amount;
+    }
+}
+
+public class ExpenseTracker {
+    private static Map<String, User> users = new HashMap<>();
+    private static Map<String, List<Expense>> expenses = new HashMap<>();
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("1. Register\n2. Log In\n3. Exit");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); 
+
+            switch (choice) {
+                case 1:
+                    registerUser(scanner);
+                    break;
+                case 2:
+                    loginUser(scanner);
+                    break;
+                case 3:
+                    System.out.println("Exiting...");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void registerUser(Scanner scanner) {
+        System.out.println("Enter username:");
+        String username = scanner.nextLine();
+
+
+        if (users.containsKey(username)) {
+            System.out.println("Username already exists. Please choose another.");
+            return;
+        }
+
+        System.out.println("Enter password:");
+        String password = scanner.nextLine();
+
+       
+        User user = new User(username, password);
+        users.put(username, user);
+        expenses.put(username, new ArrayList<>());
+
+        System.out.println("Registration successful!");
+    }
+
+    private static void loginUser(Scanner scanner) {
+        System.out.println("Enter username:");
+        String username = scanner.nextLine();
+
+
+        if (!users.containsKey(username)) {
+            System.out.println("Username not found. Please register first.");
+            return;
+        }
+
+        System.out.println("Enter password:");
+        String password = scanner.nextLine();
+
+       
+        User user = users.get(username);
+        if (!password.equals(user.password)) {
+            System.out.println("Incorrect password. Please try again.");
+            return;
+        }
+
+
+        showExpenseOptions(username, scanner);
+    }
+
+    private static void showExpenseOptions(String username, Scanner scanner) {
+        while (true) {
+            System.out.println("\nExpense Tracker Menu\n1. Enter Expense\n2. View Expenses\n3. Logout");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); 
+
+            switch (choice) {
+                case 1:
+                    enterExpense(username, scanner);
+                    break;
+                case 2:
+                    viewExpenses(username);
+                    break;
+                case 3:
+                    System.out.println("Logging out...");
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void enterExpense(String username, Scanner scanner) {
+        System.out.println("Enter Category:");
+        String category = scanner.nextLine();
+
+        System.out.println("Enter Amount:");
+        double amount = scanner.nextDouble();
+        scanner.nextLine(); 
+
+
+        List<Expense> userExpenses = expenses.get(username);
+        userExpenses.add(new Expense(category, amount));
+
+        System.out.println("Expense entered successfully!");
+    }
+
+    private static void viewExpenses(String username) {
+        List<Expense> userExpenses = expenses.get(username);
+
+        if (userExpenses.isEmpty()) {
+            System.out.println("No expenses found.");
+        } else {
+            System.out.println("\nExpense List:");
+            for (Expense expense : userExpenses) {
+                System.out.println("Category: " + expense.category + ", Amount: " + expense.amount);
+            }
+
+
+            Map<String, Double> categorySum = new HashMap<>();
+            for (Expense expense : userExpenses) {
+                categorySum.put(expense.category, categorySum.getOrDefault(expense.category, 0.0) + expense.amount);
+            }
+
+            System.out.println("\nCategory-wise Summation:");
+            for (Map.Entry<String, Double> entry : categorySum.entrySet()) {
+                System.out.println("Category: " + entry.getKey() + ", Sum: " + entry.getValue());
+            }
+        }
+    }
+}
